@@ -1,0 +1,13 @@
+<?php if (defined('AAM_MULTISITE')) { ?>
+    <tr>
+        <td>
+            <span class="aam-setting-title"><?php echo __('None-Member Restriction', AAM_KEY); ?></span>
+            <p class="aam-setting-description">
+                <?php echo AAM_Backend_View_Helper::preparePhrase('Restrict access to site, in multisite network, for users that are not members of this site. [Since AAM v3.8.2]', 'small'); ?>
+            </p>
+        </td>
+        <td>
+            <input data-toggle="toggle" data-on="<?php echo __('Enabled', AAM_KEY); ?>" data-off="<?php echo __('Disabled', AAM_KEY); ?>" type="checkbox" name="ms-member-access" <?php echo (apply_filters('aam-utility-property', 'ms-member-access', false) ? 'checked' : ''); ?> />
+        </td>
+    </tr>
+<?php }
