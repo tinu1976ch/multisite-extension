@@ -18,7 +18,7 @@ if (defined('AAM_KEY') && !defined('AAM_MULTISITE')) {
     
     if (version_compare(AAM_Core_API::version(), '5.0') === -1) {
         AAM_Core_Console::add(
-                '[Multisite] extension requires AAM 5.0 or higher.', 'b'
+            '[Multisite] extension requires AAM 5.0 or higher.', 'b'
         );
     }
 

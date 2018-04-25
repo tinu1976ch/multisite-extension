@@ -212,12 +212,17 @@ class AAM_Multisite {
      * @return void
      */
     protected function prepareSync() {
+        $config   = AAM_Core_Config::get('multisite.sync', array());
         $exporter = new AAM_Core_Exporter(
-            AAM_Core_Config::get('multisite.sync', array('system' => 'roles'))
+            array_merge(array('system' => 'roles'), $config),
+            get_main_site_id()
         );
-
+        
         return array(
-            'sites' => $this->getSites(array('count' => true)),
+            'sites' => $this->getSites(array(
+                'count'        => true,
+                'site__not_in' => $this->getExcludedBlogs($config)
+            )),
             'data'  => base64_encode(json_encode($exporter->run()))
         );
     }
@@ -235,7 +240,7 @@ class AAM_Multisite {
         } else {
             $sites = wp_get_sites($args);
         }
-
+        
         return $sites;
     }
 
@@ -243,24 +248,25 @@ class AAM_Multisite {
      * Undocumented function
      *
      * @param [type] $offset
-     * @param [type] $groups
+     * @param [type] $settings
      * @return void
      */
-    protected function sync($offset, $groups) {
+    protected function sync($offset, $settings) {
         $result = false;
 
         //retrieve list of users
         $sites = $this->getSites(array(
-            'number' => 1,
-            'limit'  => 1, //support legacy
-            'offset' => AAM_Core_Request::post('offset'),
-            'orderby' => 'id'
+            'number'       => 1,
+            'limit'        => 1, //support legacy
+            'offset'       => $offset,
+            'orderby'      => 'id',
+            'site__not_in' => $this->getExcludedBlogs()
         ));
 
         if (!empty($sites[0]->blog_id)) {
             if (!is_main_site($sites[0]->blog_id)) {
                 $importer = new AAM_Core_Importer(
-                    base64_decode(AAM_Core_Request::post('data')), 
+                    base64_decode($settings), 
                     $sites[0]->blog_id
                 );
                 $importer->run();
@@ -269,6 +275,33 @@ class AAM_Multisite {
         }
 
         return array('status' => ($result ? 'continue' : 'stop'));
+    }
+    
+    /**
+     * Get the list of excluded blogs from sync process
+     * 
+     * @param array|null $config
+     * 
+     * @return array
+     * 
+     * @access protected
+     */
+    protected function getExcludedBlogs($config = null) {
+        $excluded = array();
+        
+        if (is_null($config)){
+            $config = AAM_Core_Config::get('multisite.sync', array());
+        }
+        
+        if (!empty($config['exclude']['blogs'])) {
+            if (is_string($config['exclude']['blogs'])) {
+                $excluded = explode(',', $config['exclude']['blogs']);
+            } elseif (is_array($config['exclude']['blogs'])) {
+                $excluded = $config['exclude']['blogs'];
+            }
+        }
+        
+        return $excluded;
     }
 
     /**

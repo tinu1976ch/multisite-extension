@@ -8,7 +8,7 @@
  */
 
 return array(
-    'version' => '2.5.1',
+    'version' => '2.5.2',
     'id'      => 'AAM_MULTISITE',
     'basedir' => dirname(__FILE__)
 );
