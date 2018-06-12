@@ -36,7 +36,7 @@ class AAM_Multisite {
             if (is_network_admin()) {
                 add_action('aam-sidebar-ui-action', array($this, 'getSidebar'));
                 //print required JS & CSS
-                add_action('admin_print_scripts', array($this, 'printJavascript'));
+                add_action('admin_print_footer_scripts', array($this, 'printJS'));
             }
             
             //add custom ajax handler
@@ -55,7 +55,9 @@ class AAM_Multisite {
      * 
      */
     public function wp() {
-        $manage = apply_filters('aam-utility-property', 'ms-member-access', false);
+        $manage = AAM_Core_Config::get(
+            'core.settings.multisiteMemberAccessControl', false
+        );
         
         if (!is_main_site() && $manage) { //there is no way to restrict main site
             if (!is_user_member_of_blog()) {
@@ -69,10 +71,10 @@ class AAM_Multisite {
      */
     public function settingsList($list, $group) {
         if ($group == 'core') {
-            $list['ms-member-access'] = array(
+            $list['core.settings.multisiteMemberAccessControl'] = array(
                 'title' => __('Multisite None-Member Restriction', AAM_KEY),
-                'descr' => __('Restrict access to site for users that are not members of the site.', AAM_KEY),
-                'value' => AAM_Core_Config::get('ms-member-access', false)
+                'descr' => __('Restrict access to site for users that are not members of a site.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.multisiteMemberAccessControl', false)
             );
         }
 
@@ -101,34 +103,16 @@ class AAM_Multisite {
      *
      * @access public
      */
-    public function printJavascript() {
+    public function printJS() {
         if (AAM::isAAM()) {
-            $baseurl = $this->getBaseurl('/js');
-            wp_enqueue_script(
-                    'aam-ms', $baseurl . '/multisite.js', array('aam-main')
-            );
+            $script = file_get_contents(dirname(__FILE__) . '/js/multisite.js');
             
-            $localization = array('current' => get_current_blog_id());
-            wp_localize_script('aam-ms', 'aamMultisite', $localization);
+            // prepare localization
+            $locals = json_encode(array('current' => get_current_blog_id()));
+            
+            echo '<script type="text/javascript">aamMultisite=' . $locals . ";\n";
+            echo $script . '</script>';
         }
-    }
-
-    /**
-     * Get extension base URL
-     * 
-     * @param string $path
-     * 
-     * @return string
-     * 
-     * @access protected
-     */
-    protected function getBaseurl($path = '') {
-        $contentDir = str_replace('\\', '/', WP_CONTENT_DIR);
-        $baseDir = str_replace('\\', '/', dirname(__FILE__));
-        
-        $relative = str_replace($contentDir, '', $baseDir);
-        
-        return content_url() . $relative . $path;
     }
 
     /**

@@ -16,11 +16,11 @@ if (defined('AAM_KEY') && !defined('AAM_MULTISITE')) {
     //register activate and extension classes
     AAM_Autoloader::add('AAM_Multisite', $config['basedir'] . '/Multisite.php');
     
-    if (version_compare(AAM_Core_API::version(), '5.0') === -1) {
+    if (version_compare(AAM_Core_API::version(), '5.3.2') === -1) {
         AAM_Core_Console::add(
-            '[Multisite] extension requires AAM 5.0 or higher.', 'b'
+            '[Multisite] extension requires AAM 5.3.2 or higher.', 'b'
         );
+    } else {
+        AAM_Multisite::bootstrap();
     }
-
-    AAM_Multisite::bootstrap();
 }
