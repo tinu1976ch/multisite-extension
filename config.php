@@ -8,7 +8,10 @@
  */
 
 return array(
-    'version' => '2.5.4',
+    'version' => '2.5.5',
     'id'      => 'AAM_MULTISITE',
-    'basedir' => dirname(__FILE__)
+    'basedir' => dirname(__FILE__),
+    'requires' => array(
+        'aam'  => '5.6.1.1'
+    )
 );
